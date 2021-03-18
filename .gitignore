@@ -1,0 +1,10 @@
+﻿/.vs
+/packages
+/**/bin
+/**/obj
+/TestResults
+/**/*.png
+/**/*.jpg
+/**/PublishProfiles
+!/hsv_colorpicker.png
+!/CustomControls/Resources/pointer.png
