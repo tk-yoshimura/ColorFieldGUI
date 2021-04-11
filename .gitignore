@@ -1,10 +1,14 @@
 ﻿/.vs
+/dll
 /packages
 /**/bin
 /**/obj
-/TestResults
 /**/*.png
 /**/*.jpg
+/**/*.bak
+/**/*.user
+/TestResults
+/**/__pycache__
 /**/PublishProfiles
 !/hsv_colorpicker.png
-!/CustomControls/Resources/pointer.png
+!/ColorControls/Resources/pointer.png

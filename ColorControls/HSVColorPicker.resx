@@ -117,26 +117,4 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <metadata name="status_strip.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-    <value>17, 17</value>
-  </metadata>
-  <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
-  <data name="numt.SliderImage" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
-    <value>
-        iVBORw0KGgoAAAANSUhEUgAAAAcAAAAHCAYAAADEUlfTAAAABGdBTUEAALGPC/xhBQAAAAlwSFlzAAAO
-        wwAADsMBx2+oZAAAAFhJREFUGFdjgIH58+dzTJ8+fSmIhgohwLx580rk5OT+gGioEASAVEdGRr4FMv+D
-        aBTdINWcnJxfgMz/IBquG1kXDMN1I+uCYbjurq6uuyEhIf/RcVdX110AOy0/5BtJa/AAAAAASUVORK5C
-        YII=
-</value>
-  </data>
-  <data name="numt.TrackImage" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
-    <value>
-        iVBORw0KGgoAAAANSUhEUgAAAI8AAAAWCAYAAAD5Cs8YAAAABGdBTUEAALGPC/xhBQAAAAlwSFlzAAAO
-        wwAADsMBx2+oZAAAAE5JREFUaEPt0jEBADAMBKH6d/IqUw83M+CAt+2gkIdMHjJ5yOQhk4dMHjJ5yOQh
-        k4dMHjJ5yOQhk4dMHjJ5yOQhk4dMHjJ5yOQhk4do9wE+M5Zhk6N27AAAAABJRU5ErkJggg==
-</value>
-  </data>
-  <metadata name="$this.TrayHeight" type="System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
-    <value>32</value>
-  </metadata>
 </root>

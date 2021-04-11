@@ -1,162 +1,59 @@
 ﻿using System;
-using System.Windows.Forms;
 using System.Drawing;
 using System.Runtime.InteropServices;
+using System.Windows.Forms;
 
-// Copyright (c) T.Yoshimura 2019
+// Copyright (c) T.Yoshimura 2019-2021
 // https://github.com/tk-yoshimura
 
-namespace CustomControls {
+namespace ColorControls {
     public class HSVColorChangedEventArgs : EventArgs {
-        public HSVColorPicker.HSVparam hsv;
+        public HSV HSV { private set; get; }
 
-        public HSVColorChangedEventArgs(HSVColorPicker.HSVparam hsv) {
-            this.hsv = hsv;
+        public HSVColorChangedEventArgs(HSV hsv) {
+            this.HSV = hsv;
         }
 
         public override string ToString() {
-            return "h=" + hsv.H.ToString("0.000") + " s=" + hsv.S.ToString("0.000") + " v=" + hsv.V.ToString("0.000");
+            return "h=" + HSV.H.ToString("0.000") + " s=" + HSV.S.ToString("0.000") + " v=" + HSV.V.ToString("0.000");
         }
     }
 
     public delegate void HSVColorChangedHandler(object sender, HSVColorChangedEventArgs cce);
 
-    public class HSVColorPicker : UserControl {
-        public struct HSVparam { 
-            private double h, s, v;
+    public partial class HSVColorPicker : UserControl {
 
-            public HSVparam(double h, double s, double v) {
-                h = h % 6.0;
-                if(h < 0)  h += 6;
-                this.h = Double.IsNaN(h) ? 0 : h;
-
-                this.s = s > 0 ? (s > 1 ? 1 : s) : 0;
-
-                this.v = v > 0 ? (v > 1 ? 1 : v) : 0;
-            }
-
-            public void SetRGB(double r, double g, double b) {
-                r = r > 0 ? (r > 1 ? 1 : r) : 0;
-                g = g > 0 ? (g > 1 ? 1 : g) : 0;
-                b = b > 0 ? (b > 1 ? 1 : b) : 0;
-
-                double max_c = Math.Max(Math.Max(r, g), b);
-                double min_c = Math.Min(Math.Min(r, g), b);
-
-                h = max_c - min_c;
-                s = (max_c > 0) ? (h / max_c) : 0;
-                v = max_c;
-
-                if(h > 0) {
-                    if(max_c == r) {
-                        h = (g - b) / h + ((g >= b) ? 0.0 : 6.0);
-                    }
-                    else if(max_c == g) {
-                        h = (b - r) / h + 2.0;
-                    }
-                    else {
-                        h = (r - g) / h + 4.0;
-                    }
-                }
-            }
-
-            public void GetRGB(out double r, out double g, out double b) {
-                r = g = b = v;
-                if(s > 0) {
-                    double d = Math.Floor(h);
-                    double f = h - d;
-                    int i = (int)d;
-
-                    switch(i) { 
-                        case 0:
-                            g *= 1 - s * (1 - f);
-                            b *= 1 - s;
-                            break;
-                        case 1:
-                            r *= 1 - s * f;
-                            b *= 1 - s;
-                            break;
-                        case 2:
-                            r *= 1 - s;
-                            b *= 1 - s * (1 - f);
-                            break;
-                        case 3:
-                            r *= 1 - s;
-                            g *= 1 - s * f;
-                            break;
-                        case 4:
-                            r *= 1 - s * (1 - f);
-                            g *= 1 - s;
-                            break;
-                        default:
-                            g *= 1 - s;
-                            b *= 1 - s * f;
-                            break;
-                    }
-                }
-            }
-
-            public Double H {
-                get {
-                    return h;
-                }
-                set {
-                    value = value % 6.0;
-                    if(value < 0)  value += 6;
-                    h = Double.IsNaN(value) ? 0 : value;
-                }
-            }
-
-            public double S {
-                get {
-                    return s;
-                }
-                set { 
-                    s = value > 0 ? (value > 1 ? 1 : value) : 0;
-                }
-            }
-
-            public double V {
-                get {
-                    return v;
-                }
-                set { 
-                    v = value > 0 ? (value > 1 ? 1 : value) : 0;
-                }
-            }
-        }
-
-        static Bitmap pointer = Properties.Resources.ImagePointer;
+        static readonly Bitmap pointer = Properties.Resources.ImagePointer;
 
         int pic_size, pic_center;
         Point circle_pos, tri_pos, prev_pointer_pos;
         Size circle_size, tri_size;
 
-        HSVparam hsv;
-        
+        HSV hsv;
+
         Bitmap circle, triangle;
         bool[,] tri_area;
 
         enum ManipulatePlace { None, Circle, Triangle };
         ManipulatePlace manipulate_place = ManipulatePlace.None;
 
-        public event HSVColorChangedHandler HSVColorChanged;
-
         public HSVColorPicker() {
             SetStyle(ControlStyles.OptimizedDoubleBuffer, true);
             SetStyle(ControlStyles.UserPaint, true);
             SetStyle(ControlStyles.AllPaintingInWmPaint, true);
-            SetImage();
+            DrawImage();
         }
 
-        public HSVparam HSV {
+        public event HSVColorChangedHandler ValueChanged;
+
+        public HSV HSV {
             get {
                 return hsv;
             }
             set {
-                if(hsv.H != value.H) {
+                if (hsv.H != value.H) {
                     hsv = value;
-                    SetTriangle();
+                    DrawTriangle();
                 }
                 hsv = value;
                 Invalidate();
@@ -164,14 +61,14 @@ namespace CustomControls {
         }
 
         protected override void OnPaint(PaintEventArgs pe) {
-            if(IsValidSize()) {
+            if (IsValidSize()) {
                 Graphics g = pe.Graphics;
 
-                if(circle != null) {
+                if (circle is not null) {
                     g.DrawImageUnscaled(circle, circle_pos);
                 }
 
-                if(triangle != null) {
+                if (triangle is not null) {
                     g.DrawImageUnscaled(triangle, tri_pos);
                 }
 
@@ -183,7 +80,7 @@ namespace CustomControls {
 
         protected override void OnResize(EventArgs e) {
             manipulate_place = ManipulatePlace.None;
-            SetImage();
+            DrawImage();
             base.OnResize(e);
             Invalidate();
         }
@@ -194,14 +91,14 @@ namespace CustomControls {
         }
 
         protected override void OnMouseDown(MouseEventArgs e) {
-            if(e.Button == MouseButtons.Left && IsValidSize()) {
+            if (e.Button == MouseButtons.Left && IsValidSize()) {
                 manipulate_place = ManipulatePlace.None;
 
-                if(IsCircleArea(e.X, e.Y)){
+                if (IsCircleArea(e.X, e.Y)) {
                     manipulate_place = ManipulatePlace.Circle;
                     AcceptManipulateCircle(e);
                 }
-                else if(IsTriangleArea(e.X, e.Y)) {
+                else if (IsTriangleArea(e.X, e.Y)) {
                     manipulate_place = ManipulatePlace.Triangle;
                     AcceptManipulateTriangle(e);
                 }
@@ -210,7 +107,7 @@ namespace CustomControls {
         }
 
         protected override void OnMouseUp(MouseEventArgs e) {
-            if(e.Button == MouseButtons.Left) {
+            if (e.Button == MouseButtons.Left) {
                 manipulate_place = ManipulatePlace.None;
             }
             base.OnMouseUp(e);
@@ -222,11 +119,11 @@ namespace CustomControls {
         }
 
         protected override void OnMouseMove(MouseEventArgs e) {
-            if(e.Button == MouseButtons.Left && IsValidSize()) {
-                if(manipulate_place == ManipulatePlace.Circle) {
+            if (e.Button == MouseButtons.Left && IsValidSize()) {
+                if (manipulate_place == ManipulatePlace.Circle) {
                     AcceptManipulateCircle(e);
                 }
-                else if(manipulate_place == ManipulatePlace.Triangle) {
+                else if (manipulate_place == ManipulatePlace.Triangle) {
                     AcceptManipulateTriangle(e);
                 }
             }
@@ -234,11 +131,11 @@ namespace CustomControls {
         }
 
         protected override void OnMouseClick(MouseEventArgs e) {
-            if(e.Button == MouseButtons.Left && manipulate_place == ManipulatePlace.None && IsValidSize()) { 
-                if(IsCircleArea(e.X, e.Y)){
+            if (e.Button == MouseButtons.Left && manipulate_place == ManipulatePlace.None && IsValidSize()) {
+                if (IsCircleArea(e.X, e.Y)) {
                     AcceptManipulateCircle(e);
                 }
-                else if(IsTriangleArea(e.X, e.Y)) {
+                else if (IsTriangleArea(e.X, e.Y)) {
                     AcceptManipulateTriangle(e);
                 }
             }
@@ -246,22 +143,23 @@ namespace CustomControls {
         }
 
         protected override void OnHandleDestroyed(EventArgs e) {
-            if(circle != null){
+            if (circle is not null) {
                 circle.Dispose();
                 circle = null;
             }
-            if(triangle != null){
+            if (triangle is not null) {
                 triangle.Dispose();
                 triangle = null;
             }
             base.OnHandleDestroyed(e);
         }
 
-        protected void SetCircle() {
-            if(circle != null)
+        protected void DrawCircle() {
+            if (circle is not null) {
                 circle.Dispose();
+            }
 
-            if(IsValidSize()) {
+            if (IsValidSize()) {
                 circle = new Bitmap(circle_size.Width, circle_size.Height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
             }
             else {
@@ -276,41 +174,41 @@ namespace CustomControls {
             byte[] buf = new byte[width * height * 4];
 
             unsafe {
-                fixed(byte* c = buf) {
-                    for(int x, y = 0, i = 0; y < height; y++) {
+                fixed (byte* c = buf) {
+                    for (int x, y = 0, i = 0; y < height; y++) {
                         dy = y - pic_center;
-                        for(x = 0; x < width; x++, i += 4) {
+                        for (x = 0; x < width; x++, i += 4) {
                             dx = x - pic_center;
                             norm_sq = dx * dx + dy * dy;
 
-                            if(norm_sq > outer_thr_sq || inner_thr_sq > norm_sq) {
+                            if (norm_sq > outer_thr_sq || inner_thr_sq > norm_sq) {
                                 continue;
                             }
 
                             alpha = Math.Min(1, norm_rate * Math.Min(outer_thr_sq - norm_sq, norm_sq - inner_thr_sq));
                             hue = (Math.Atan2(-dx, dy) / Math.PI + 1.0) * 3.0;
 
-                            if(hue < 1) {
+                            if (hue < 1) {
                                 r = 1;
                                 g = hue - 0;
                                 b = 0;
                             }
-                            else if(hue < 2) {
+                            else if (hue < 2) {
                                 r = 2 - hue;
                                 g = 1;
                                 b = 0;
                             }
-                            else if(hue < 3) {
+                            else if (hue < 3) {
                                 r = 0;
                                 g = 1;
                                 b = hue - 2;
                             }
-                            else if(hue < 4) {
+                            else if (hue < 4) {
                                 r = 0;
                                 g = 4 - hue;
                                 b = 1;
                             }
-                            else if(hue < 5) {
+                            else if (hue < 5) {
                                 r = hue - 4;
                                 g = 0;
                                 b = 1;
@@ -335,14 +233,14 @@ namespace CustomControls {
             circle.UnlockBits(bmpdata);
         }
 
-        protected void SetTriangle() {
-            if(triangle != null)
+        protected void DrawTriangle() {
+            if (triangle is not null)
                 triangle.Dispose();
-            
-            if(IsValidSize()) {
+
+            if (IsValidSize()) {
                 triangle = new Bitmap(tri_size.Width, tri_size.Height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
             }
-            else { 
+            else {
                 triangle = new Bitmap(1, 1);
                 return;
             }
@@ -358,7 +256,7 @@ namespace CustomControls {
             unsafe {
                 double* cv, cs, cf;
 
-                switch(cr_i) {
+                switch (cr_i) {
                     case 0:
                         cv = &r;
                         cf = &g;
@@ -394,14 +292,14 @@ namespace CustomControls {
                         break;
                 }
 
-                fixed(byte *c = buf){
-                    for(int x, y = 0, i = 0; y < height; y++) {
+                fixed (byte* c = buf) {
+                    for (int x, y = 0, i = 0; y < height; y++) {
                         dy = (height - y - 2) * inv_h;
                         dy = (dy < 0) ? 0 : (dy > 1) ? 1 : dy;
 
-                        for(x = 0; x < width; x++) {
+                        for (x = 0; x < width; x++) {
                             alpha = Math.Min(1, smooth_rate * Math.Min((sqrt3 * x) - (height - y), (sqrt3 * (width - x - 1)) - (height - y)));
-                            if(alpha < 0) {
+                            if (alpha < 0) {
                                 i += 4;
                                 continue;
                             }
@@ -433,26 +331,26 @@ namespace CustomControls {
             triangle.UnlockBits(bmpdata);
         }
 
-        protected void SetImage() {
+        protected void DrawImage() {
             pic_size = Math.Max(Math.Min(this.Width, this.Height) / 2 * 2 - 1, 49);
             pic_center = pic_size / 2;
 
             circle_size = new Size(pic_size, pic_size);
             tri_size = new Size((pic_size * 63 / 100) / 2 * 2 - 1, pic_size * 273 / 500 + 1);
-            
+
             circle_pos = new Point((this.Width - circle_size.Width) / 2, (this.Height - circle_size.Height) / 2);
             tri_pos = new Point(circle_pos.X + (circle_size.Width - tri_size.Width) / 2, circle_pos.Y + pic_size * 27 / 200);
 
-            SetCircle();
-            SetTriangle();
+            DrawCircle();
+            DrawTriangle();
         }
 
         private void DrawPointer(Graphics g) {
-            if(pointer == null || g == null || !IsValidSize()) {
+            if (pointer is null || g is null || !IsValidSize()) {
                 return;
             }
 
-            g.DrawImageUnscaled(pointer, (int)(pic_center + circle_pos.X + pic_size * Math.Sin(hsv.H * Math.PI / 3.0) * 0.42 - pointer.Width  * 0.5 + 1), 
+            g.DrawImageUnscaled(pointer, (int)(pic_center + circle_pos.X + pic_size * Math.Sin(hsv.H * Math.PI / 3.0) * 0.42 - pointer.Width * 0.5 + 1),
                                          (int)(pic_center + circle_pos.Y - pic_size * Math.Cos(hsv.H * Math.PI / 3.0) * 0.42 - pointer.Height * 0.5 + 1));
 
             int x, y;
@@ -467,76 +365,77 @@ namespace CustomControls {
         }
 
         private void AcceptManipulateCircle(MouseEventArgs e) {
-            if(!IsValidSize()) {
+            if (!IsValidSize()) {
                 return;
             }
 
             double dx = e.X - circle_pos.X - pic_center, dy = e.Y - circle_pos.Y - pic_center;
 
-            if(Math.Sqrt(dx * dx + dy * dy) < (pic_center * 0.3)) {
+            if (Math.Sqrt(dx * dx + dy * dy) < (pic_center * 0.3)) {
                 return;
             }
 
             hsv.H = (Math.Atan2(-dx, dy) / Math.PI + 1.0) * 3.0;
-            SetTriangle();
+            DrawTriangle();
             Invalidate();
-            OnHSVColorChanged(new HSVColorChangedEventArgs(hsv));
+
+            ValueChanged?.Invoke(this, new HSVColorChangedEventArgs(hsv));
         }
 
         private void AcceptManipulateTriangle(MouseEventArgs e) {
-            if(!IsValidSize()) {
+            if (!IsValidSize()) {
                 return;
             }
 
             int x = e.X, y = e.Y;
             bool is_accept = false;
 
-            if(IsTriangleArea(x, y)) {
+            if (IsTriangleArea(x, y)) {
                 is_accept = true;
             }
             else {
                 int buf_x = prev_pointer_pos.X, buf_y = prev_pointer_pos.Y;
-                int[] dx = {+1, -1, +1, -1, +1, -1,  0,  0};
-                int[] dy = {+1, +1, -1, -1,  0,  0, +1, -1};
+                int[] dx = { +1, -1, +1, -1, +1, -1, 0, 0 };
+                int[] dy = { +1, +1, -1, -1, 0, 0, +1, -1 };
 
-                Func<int, int, bool> is_move = (new_x, new_y) => {
-                    if(IsTriangleArea(new_x, new_y) == false) {
+                bool is_move(int new_x, int new_y) {
+                    if (IsTriangleArea(new_x, new_y) == false) {
                         return false;
                     }
 
                     int odx = x - buf_x, ody = y - buf_y;
                     int ndx = x - new_x, ndy = y - new_y;
 
-                    if((odx * odx + ody * ody) < (ndx * ndx + ndy * ndy))
+                    if ((odx * odx + ody * ody) < (ndx * ndx + ndy * ndy))
                         return false;
 
                     return true;
-                };
+                }
 
-                for(int i = 0, j; i < pic_center; i++) {
-                    for(j = 0; j < 8; j++) {
-                        if(is_move(buf_x + dx[j], buf_y + dy[j])) {
+                for (int i = 0, j; i < pic_center; i++) {
+                    for (j = 0; j < 8; j++) {
+                        if (is_move(buf_x + dx[j], buf_y + dy[j])) {
                             buf_x += dx[j];
                             buf_y += dy[j];
                             is_accept = true;
                             break;
                         }
                     }
-                    if(j == 8)
+                    if (j == 8)
                         break;
                 }
 
-                x = buf_x;  y = buf_y;
+                x = buf_x; y = buf_y;
             }
 
-            if(is_accept) { 
+            if (is_accept) {
                 int width = tri_size.Width, height = tri_size.Height;
                 double inv_w = 1.0 / (width - 7), inv_h = 1.0 / (width * 0.5 * Math.Sqrt(3.0) - 7);
                 double dx, dy, sat, val, ds;
 
-                prev_pointer_pos.X = x;  prev_pointer_pos.Y = y;
+                prev_pointer_pos.X = x; prev_pointer_pos.Y = y;
 
-                x -= tri_pos.X;  y -= tri_pos.Y;
+                x -= tri_pos.X; y -= tri_pos.Y;
 
                 dx = (x - 3) * inv_w;
                 dx = (dx < 0) ? 0 : (dx > 1) ? 1 : dx;
@@ -549,12 +448,13 @@ namespace CustomControls {
                 hsv.V = val > 0 ? (val > 1 ? 1 : val) : 0;
                 hsv.S = sat > 0 ? (sat > 1 ? 1 : sat) : 0;
                 Invalidate();
-                OnHSVColorChanged(new HSVColorChangedEventArgs(hsv));
+
+                ValueChanged?.Invoke(this, new HSVColorChangedEventArgs(hsv));
             }
         }
 
-        private bool IsCircleArea(int x, int y) { 
-            if(!IsValidSize()) {
+        private bool IsCircleArea(int x, int y) {
+            if (!IsValidSize()) {
                 return false;
             }
 
@@ -563,14 +463,14 @@ namespace CustomControls {
         }
 
         private bool IsTriangleArea(int x, int y) {
-            if(tri_area == null || !IsValidSize()) {
+            if (tri_area is null || !IsValidSize()) {
                 return false;
             }
 
             int w = tri_area.GetLength(0), h = tri_area.GetLength(1);
-            x -= tri_pos.X;  y -= tri_pos.Y;
+            x -= tri_pos.X; y -= tri_pos.Y;
 
-            if(x < 0 || x >= w || y < 0 || y >= h) {
+            if (x < 0 || x >= w || y < 0 || y >= h) {
                 return false;
             }
 
@@ -578,13 +478,7 @@ namespace CustomControls {
         }
 
         private bool IsValidSize() {
-            return pic_size > 49; 
-        }
-
-        protected virtual void OnHSVColorChanged(HSVColorChangedEventArgs cce) {
-            if(HSVColorChanged != null) {
-                HSVColorChanged(this, cce);
-            }
+            return pic_size > 49;
         }
     }
 }

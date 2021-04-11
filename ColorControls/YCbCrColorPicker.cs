@@ -1,19 +1,35 @@
 ﻿using System;
-using System.Windows.Forms;
 using System.Drawing;
 using System.Runtime.InteropServices;
+using System.Windows.Forms;
 
 // Copyright (c) T.Yoshimura 2019
 // https://github.com/tk-yoshimura
 
-namespace CustomControls {
-    class YCbCrColorPicker : UserControl {
-        static Bitmap pointer = Properties.Resources.ImagePointer;
-        
+namespace ColorControls {
+    public class YCbCrColorChangedEventArgs : EventArgs {
+        public YCbCr YCbCr { private set; get; }
+
+        public YCbCrColorChangedEventArgs(YCbCr ycbcr) {
+            this.YCbCr = ycbcr;
+        }
+
+        public override string ToString() {
+            return "y=" + YCbCr.Y.ToString("0.000") + " cb=" + YCbCr.Cb.ToString("0.000") + " cr=" + YCbCr.Cr.ToString("0.000");
+        }
+    }
+
+    public delegate void YCbCrColorChangedHandler(object sender, YCbCrColorChangedEventArgs cce);
+
+    public class YCbCrColorPicker : UserControl {
+        static readonly Bitmap pointer = Properties.Resources.ImagePointer;
+
         int pic_size;
-        double cy = 0.50, cb = 0, cr = 0;
+
         Point bar_pos, panel_pos;
         Size bar_size, panel_size;
+
+        YCbCr ycbcr = new(0.5, 0, 0);
 
         Bitmap bar, panel;
 
@@ -24,30 +40,44 @@ namespace CustomControls {
             SetStyle(ControlStyles.OptimizedDoubleBuffer, true);
             SetStyle(ControlStyles.UserPaint, true);
             SetStyle(ControlStyles.AllPaintingInWmPaint, true);
-            SetImage();
+            DrawImage();
+        }
+
+        public event YCbCrColorChangedHandler ValueChanged;
+
+        public YCbCr YCbCr {
+            get {
+                return ycbcr;
+            }
+            set {
+                ycbcr = value;
+
+                DrawPanel();
+                Invalidate();
+            }
         }
 
         protected override void OnPaint(PaintEventArgs pe) {
-            if(IsValidSize()) {
+            if (IsValidSize()) {
                 Graphics g = pe.Graphics;
 
-                if(bar != null) {
+                if (bar is not null) {
                     g.DrawImageUnscaled(bar, bar_pos);
                 }
 
-                if(panel != null) {
+                if (panel is not null) {
                     g.DrawImageUnscaled(panel, panel_pos);
                 }
 
                 DrawPointer(g);
             }
-            
+
             base.OnPaint(pe);
         }
 
         protected override void OnResize(EventArgs e) {
             manipulate_place = ManipulatePlace.None;
-            SetImage();
+            DrawImage();
             base.OnResize(e);
             Invalidate();
         }
@@ -58,14 +88,14 @@ namespace CustomControls {
         }
 
         protected override void OnMouseDown(MouseEventArgs e) {
-            if(e.Button == MouseButtons.Left && IsValidSize()) {
+            if (e.Button == MouseButtons.Left && IsValidSize()) {
                 manipulate_place = ManipulatePlace.None;
 
-                if(IsBarArea(e.X, e.Y)) {
+                if (IsBarArea(e.X, e.Y)) {
                     manipulate_place = ManipulatePlace.Bar;
                     AcceptManipulateBar(e);
                 }
-                else if(IsPanelArea(e.X, e.Y)) {
+                else if (IsPanelArea(e.X, e.Y)) {
                     manipulate_place = ManipulatePlace.Panel;
                     AcceptManipulatePanel(e);
                 }
@@ -74,7 +104,7 @@ namespace CustomControls {
         }
 
         protected override void OnMouseUp(MouseEventArgs e) {
-            if(e.Button == MouseButtons.Left) {
+            if (e.Button == MouseButtons.Left) {
                 manipulate_place = ManipulatePlace.None;
             }
             base.OnMouseUp(e);
@@ -86,11 +116,11 @@ namespace CustomControls {
         }
 
         protected override void OnMouseMove(MouseEventArgs e) {
-            if(e.Button == MouseButtons.Left && IsValidSize()) {
-                if(manipulate_place == ManipulatePlace.Bar) {
+            if (e.Button == MouseButtons.Left && IsValidSize()) {
+                if (manipulate_place == ManipulatePlace.Bar) {
                     AcceptManipulateBar(e);
                 }
-                else if(manipulate_place == ManipulatePlace.Panel) {
+                else if (manipulate_place == ManipulatePlace.Panel) {
                     AcceptManipulatePanel(e);
                 }
             }
@@ -98,11 +128,11 @@ namespace CustomControls {
         }
 
         protected override void OnMouseClick(MouseEventArgs e) {
-            if(e.Button == MouseButtons.Left && manipulate_place == ManipulatePlace.None && IsValidSize()) {
-                if(IsBarArea(e.X, e.Y)) {
+            if (e.Button == MouseButtons.Left && manipulate_place == ManipulatePlace.None && IsValidSize()) {
+                if (IsBarArea(e.X, e.Y)) {
                     AcceptManipulateBar(e);
                 }
-                else if(IsPanelArea(e.X, e.Y)) {
+                else if (IsPanelArea(e.X, e.Y)) {
                     AcceptManipulatePanel(e);
                 }
             }
@@ -110,22 +140,22 @@ namespace CustomControls {
         }
 
         protected override void OnHandleDestroyed(EventArgs e) {
-            if(bar != null) {
+            if (bar is not null) {
                 bar.Dispose();
                 bar = null;
             }
-            if(bar != null) {
+            if (bar is not null) {
                 bar.Dispose();
                 bar = null;
             }
             base.OnHandleDestroyed(e);
         }
 
-        protected void SetBar() {
-            if(bar != null)
+        protected void DrawBar() {
+            if (bar is not null)
                 bar.Dispose();
 
-            if(IsValidSize()) {
+            if (IsValidSize()) {
                 bar = new Bitmap(bar_size.Width, bar_size.Height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
             }
             else {
@@ -138,13 +168,13 @@ namespace CustomControls {
 
             byte[] buf = new byte[width * height * 4];
 
-            unsafe{
-                fixed (byte* c = buf){
-                    for(int x, y = 0, i = 0; y < height; y++) {
+            unsafe {
+                fixed (byte* c = buf) {
+                    for (int x, y = 0, i = 0; y < height; y++) {
 
                         gray = (byte)(255 - 256 * y / height);
 
-                        for(x = 0; x < width; x++, i += 4) {
+                        for (x = 0; x < width; x++, i += 4) {
                             c[i] = c[i + 1] = c[i + 2] = gray;
                             c[i + 3] = 255;
                         }
@@ -157,11 +187,11 @@ namespace CustomControls {
             bar.UnlockBits(bmpdata);
         }
 
-        protected void SetPanel() {
-            if(panel != null)
+        protected void DrawPanel() {
+            if (panel is not null)
                 panel.Dispose();
 
-            if(IsValidSize()) {
+            if (IsValidSize()) {
                 panel = new Bitmap(panel_size.Width, panel_size.Height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
             }
             else {
@@ -175,21 +205,21 @@ namespace CustomControls {
 
             byte[] buf = new byte[width * height * 4];
 
-            Func<double, byte> clip = c => (byte)Math.Max(Math.Min(c, 255), 0);
+            static byte clip(double c) => (byte)Math.Max(Math.Min(c, 255), 0);
 
-            unsafe{
-                fixed (byte* c = buf){
-                    for(int x, y = 0, i = 0; y < height; y++) {
+            unsafe {
+                fixed (byte* c = buf) {
+                    for (int x, y = 0, i = 0; y < height; y++) {
 
                         cr = 0.5 - y * inv_pic_size;
 
-                        for(x = 0; x < width; x++) {
+                        for (x = 0; x < width; x++) {
 
                             cb = x * inv_pic_size - 0.5;
 
-                            b = cy + 1.7364369465163 * cr - 0.13272312247338 * cb;
-                            g = cy - 0.4182635918629 * cr - 0.71007339166301 * cb;
-                            r = cy + 0.1590866773267 * cr + 1.44462714671624 * cb;
+                            b = ycbcr.Y + 1.7364369465163 * cr - 0.13272312247338 * cb;
+                            g = ycbcr.Y - 0.4182635918629 * cr - 0.71007339166301 * cb;
+                            r = ycbcr.Y + 0.1590866773267 * cr + 1.44462714671624 * cb;
 
                             c[i++] = clip(b * 255 + 0.5);
                             c[i++] = clip(g * 255 + 0.5);
@@ -205,7 +235,7 @@ namespace CustomControls {
             panel.UnlockBits(bmpdata);
         }
 
-        protected void SetImage() {
+        protected void DrawImage() {
             int mx, my;
             pic_size = Math.Min(this.Width * 10 / 13, this.Height) - 4;
             mx = (this.Width - pic_size * 13 / 10) / 2;
@@ -217,49 +247,49 @@ namespace CustomControls {
             bar_pos = new Point(mx, my);
             panel_pos = new Point(mx + pic_size * 3 / 10, my);
 
-            SetBar();
-            SetPanel();
+            DrawBar();
+            DrawPanel();
         }
 
         private void DrawPointer(Graphics g) {
-            if(pointer == null || g == null || !IsValidSize()) {
+            if (pointer is null || g is null || !IsValidSize()) {
                 return;
             }
 
-            g.DrawImageUnscaled(pointer, bar_pos.X + bar_size.Width / 2 - pointer.Width / 2, (int)(bar_pos.Y + (1 - cy) * (bar_size.Height - 1)) - pointer.Height / 2);
-            g.DrawImageUnscaled(pointer, (int)(panel_pos.X + (cb + 0.5) * (panel_size.Width - 1)) - pointer.Width / 2, (int)(panel_pos.Y + (cr + 0.5) * (panel_size.Height - 1)) - pointer.Width / 2);
+            g.DrawImageUnscaled(pointer, bar_pos.X + bar_size.Width / 2 - pointer.Width / 2, (int)(bar_pos.Y + (1 - ycbcr.Y) * (bar_size.Height - 1)) - pointer.Height / 2);
+            g.DrawImageUnscaled(pointer, (int)(panel_pos.X + (ycbcr.Cb + 0.5) * (panel_size.Width - 1)) - pointer.Width / 2, (int)(panel_pos.Y + (ycbcr.Cr + 0.5) * (panel_size.Height - 1)) - pointer.Width / 2);
         }
 
         private void AcceptManipulateBar(MouseEventArgs e) {
-            if(!IsValidSize()) {
+            if (!IsValidSize()) {
                 return;
             }
 
-            cy = 1 - (double)(e.Y - bar_pos.Y) / (double)(bar_size.Height - 1);
-            cy = cy > 0 ? (cy > 1 ? 1 : cy) : 0;
+            ycbcr.Y = 1 - (double)(e.Y - bar_pos.Y) / (double)(bar_size.Height - 1);
 
-            SetPanel();
+            DrawPanel();
             Invalidate();
+
+            ValueChanged?.Invoke(this, new YCbCrColorChangedEventArgs(YCbCr));
         }
 
         private void AcceptManipulatePanel(MouseEventArgs e) {
-            if(!IsValidSize()) {
+            if (!IsValidSize()) {
                 return;
             }
 
             double inv_pic_size = 1.0 / (pic_size - 1);
 
-            cb = (e.X - panel_pos.X) * inv_pic_size - 0.5;
-            cr = (e.Y - panel_pos.Y) * inv_pic_size - 0.5;
-
-            cb = cb > -0.5 ? (cb > +0.5 ? +0.5 : cb) : -0.5;
-            cr = cr > -0.5 ? (cr > +0.5 ? +0.5 : cr) : -0.5;
+            ycbcr.Cb = (e.X - panel_pos.X) * inv_pic_size - 0.5;
+            ycbcr.Cr = (e.Y - panel_pos.Y) * inv_pic_size - 0.5;
 
             Invalidate();
+
+            ValueChanged?.Invoke(this, new YCbCrColorChangedEventArgs(YCbCr));
         }
 
         private bool IsBarArea(int x, int y) {
-            if(!IsValidSize()) {
+            if (!IsValidSize()) {
                 return false;
             }
 
@@ -267,7 +297,7 @@ namespace CustomControls {
         }
 
         private bool IsPanelArea(int x, int y) {
-            if(!IsValidSize()) {
+            if (!IsValidSize()) {
                 return false;
             }
 

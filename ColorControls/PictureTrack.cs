@@ -5,60 +5,60 @@ using System.Windows.Forms;
 // Copyright (c) T.Yoshimura 2019
 // https://github.com/tk-yoshimura
 
-namespace CustomControls {
+namespace ColorControls {
     public class SliderMoveEventArgs : EventArgs {
         public int Range, Position;
 
-        public SliderMoveEventArgs(int range, int position){
+        public SliderMoveEventArgs(int range, int position) {
             this.Range = range;
             this.Position = position;
         }
 
         public override string ToString() {
-            return Position.ToString() + " / "  + Range.ToString();
+            return Position.ToString() + " / " + Range.ToString();
         }
     }
 
     public delegate void SliderMoveHandler(object sender, SliderMoveEventArgs se);
 
     public class PictureTrack : UserControl {
-        static Bitmap default_track, default_slider;
-        
+        static readonly Bitmap default_track, default_slider;
+
         int slider_position = 0, slider_range = 100, slider_change = 1, slider_top_position = 18, key_press_count = 0;
         bool is_accept_mouse = false;
-        Bitmap track = new Bitmap(default_track), slider = new Bitmap(default_slider);
-        
+        Bitmap track = new(default_track), slider = new(default_slider);
+
         public event SliderMoveHandler SliderMove;
 
-        static PictureTrack() { 
+        static PictureTrack() {
             default_track = new Bitmap(143, 22);
             default_slider = new Bitmap(7, 7);
 
-            using(Graphics g_track = Graphics.FromImage(default_track)) {
+            using (Graphics g_track = Graphics.FromImage(default_track)) {
                 g_track.Clear(Color.DarkGray);
             }
 
-            using(Graphics g_slider = Graphics.FromImage(default_slider)) {
-                Pen p = new Pen(Color.DarkGray, (float)0.5);
-                Brush b = new SolidBrush(Color.Black);
-                Point[] points = new Point[3]{new Point(0, 6), new Point(6, 6), new Point(3, 0)};
+            using Graphics g_slider = Graphics.FromImage(default_slider);
 
-                g_slider.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
-                g_slider.DrawPolygon(p, points);
-                g_slider.FillPolygon(b, points);
-            }
+            Pen p = new(Color.DarkGray, (float)0.5);
+            Brush b = new SolidBrush(Color.Black);
+            Point[] points = new Point[3] { new Point(0, 6), new Point(6, 6), new Point(3, 0) };
+
+            g_slider.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+            g_slider.DrawPolygon(p, points);
+            g_slider.FillPolygon(b, points);
         }
 
-        public PictureTrack(){
+        public PictureTrack() {
             Size = DefaultSize;
             SetStyle(ControlStyles.OptimizedDoubleBuffer, true);
             SetStyle(ControlStyles.UserPaint, true);
             SetStyle(ControlStyles.AllPaintingInWmPaint, true);
         }
-        
+
         public Bitmap TrackImage {
             set {
-                if(value == null) {
+                if (value is null) {
                     return;
                 }
 
@@ -72,7 +72,7 @@ namespace CustomControls {
 
         public Bitmap SliderImage {
             set {
-                if(value == null) {
+                if (value is null) {
                     return;
                 }
 
@@ -100,11 +100,11 @@ namespace CustomControls {
             }
             set {
                 slider_range = (value > 0) ? value : 1;
-                this.Invalidate();
+                Invalidate();
             }
         }
 
-        public int SliderChange { 
+        public int SliderChange {
             get {
                 return slider_change;
             }
@@ -113,7 +113,7 @@ namespace CustomControls {
             }
         }
 
-        public int SliderTopPosition { 
+        public int SliderTopPosition {
             get {
                 return slider_top_position;
             }
@@ -125,7 +125,7 @@ namespace CustomControls {
 
         protected override Size DefaultSize {
             get {
-                if(track != null && slider != null) {
+                if (track is not null && slider is not null) {
                     return new Size(track.Width + slider.Width, Math.Max(track.Height, slider.Height + slider_top_position));
                 }
 
@@ -140,9 +140,9 @@ namespace CustomControls {
         }
 
         protected override void OnPaint(PaintEventArgs pe) {
-            if(track != null && slider != null) {
+            if (track is not null && slider is not null) {
                 Size s = this.DefaultSize;
-                Point p = new Point((this.Width - s.Width) / 2, (this.Height - s.Height) / 2);
+                Point p = new((this.Width - s.Width) / 2, (this.Height - s.Height) / 2);
 
                 Graphics g = pe.Graphics;
 
@@ -154,22 +154,23 @@ namespace CustomControls {
         }
 
         protected override void OnMouseDown(MouseEventArgs e) {
-            if(track != null && slider != null) {
-                if(e.Button == MouseButtons.Left) {
+            if (track is not null && slider is not null) {
+                if (e.Button == MouseButtons.Left) {
                     is_accept_mouse = true;
 
                     int x = e.X - (this.Width - (track.Width + slider.Width)) / 2 + track.Width / slider_range / 2;
 
                     SliderPosition = slider_range * (x - slider.Width / 2) / track.Width;
-                    this.Invalidate();
-                    this.OnSliderMove(new SliderMoveEventArgs(slider_range, slider_position));
+                    Invalidate();
+
+                    SliderMove?.Invoke(this, new SliderMoveEventArgs(slider_range, slider_position));
                 }
             }
             base.OnMouseDown(e);
         }
 
         protected override void OnMouseUp(MouseEventArgs e) {
-            if(e.Button == MouseButtons.Left) {
+            if (e.Button == MouseButtons.Left) {
                 is_accept_mouse = false;
             }
             base.OnMouseUp(e);
@@ -181,33 +182,35 @@ namespace CustomControls {
         }
 
         protected override void OnMouseMove(MouseEventArgs e) {
-            if(track != null && slider != null) {
-                if(is_accept_mouse && e.Button == MouseButtons.Left) {
+            if (track is not null && slider is not null) {
+                if (is_accept_mouse && e.Button == MouseButtons.Left) {
                     int x = e.X - (this.Width - (track.Width + slider.Width)) / 2 + track.Width / slider_range / 2;
 
                     SliderPosition = slider_range * (x - slider.Width / 2) / track.Width;
-                    this.Invalidate();
-                    this.OnSliderMove(new SliderMoveEventArgs(slider_range, slider_position));
+                    Invalidate();
+
+                    SliderMove?.Invoke(this, new SliderMoveEventArgs(slider_range, slider_position));
                 }
             }
-            base.OnMouseMove(e);            
+            base.OnMouseMove(e);
         }
 
         protected override void OnMouseClick(MouseEventArgs e) {
-            if(track != null && slider != null) {
-                if(e.Button == MouseButtons.Left) {
+            if (track is not null && slider is not null) {
+                if (e.Button == MouseButtons.Left) {
                     int x = e.X - (this.Width - (track.Width + slider.Width)) / 2 + track.Width / slider_range / 2;
 
                     SliderPosition = slider_range * (x - slider.Width / 2) / track.Width;
-                    this.Invalidate();
-                    this.OnSliderMove(new SliderMoveEventArgs(slider_range, slider_position));
+                    Invalidate();
+
+                    SliderMove?.Invoke(this, new SliderMoveEventArgs(slider_range, slider_position));
                 }
             }
             base.OnMouseClick(e);
         }
 
         protected override bool IsInputKey(Keys keyData) {
-            if(keyData == Keys.Left || keyData == Keys.Right) {
+            if (keyData == Keys.Left || keyData == Keys.Right) {
                 return true;
             }
 
@@ -216,14 +219,14 @@ namespace CustomControls {
 
         protected override void OnKeyDown(KeyEventArgs e) {
             base.OnKeyDown(e);
-            if(e.KeyData != Keys.Left && e.KeyData != Keys.Right) {
+            if (e.KeyData != Keys.Left && e.KeyData != Keys.Right) {
                 return;
             }
 
             key_press_count++;
             int change = SliderChange;
-            for(int i = 5; i <= 50; i += 5) {
-                if(key_press_count > i) {
+            for (int i = 5; i <= 50; i += 5) {
+                if (key_press_count > i) {
                     change *= 2;
                 }
                 else {
@@ -231,27 +234,22 @@ namespace CustomControls {
                 }
             }
 
-            if(e.KeyData == Keys.Left){
+            if (e.KeyData == Keys.Left) {
                 SliderPosition -= change;
             }
-            if(e.KeyData == Keys.Right){
+            if (e.KeyData == Keys.Right) {
                 SliderPosition += change;
             }
 
-            this.Invalidate();
-            this.OnSliderMove(new SliderMoveEventArgs(slider_range, slider_position));
+            Invalidate();
+
+            SliderMove?.Invoke(this, new SliderMoveEventArgs(slider_range, slider_position));
         }
 
         protected override void OnKeyUp(KeyEventArgs e) {
             base.OnKeyUp(e);
-            if(e.KeyData == Keys.Left || e.KeyData == Keys.Right) {
+            if (e.KeyData == Keys.Left || e.KeyData == Keys.Right) {
                 key_press_count = 0;
-            }
-        }
-
-        protected virtual void OnSliderMove(SliderMoveEventArgs se) {
-            if(SliderMove != null) {
-                SliderMove(this, se);
             }
         }
     }
