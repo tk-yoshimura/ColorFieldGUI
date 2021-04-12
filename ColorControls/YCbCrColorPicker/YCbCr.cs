@@ -58,5 +58,9 @@ namespace ColorControls {
                 return (r, g, b);
             }
         }
+
+        public override string ToString() {
+            return $"y={Y:0.000} cb={Cb:0.000} cr={Cr:0.000}";
+        }
     }
 }

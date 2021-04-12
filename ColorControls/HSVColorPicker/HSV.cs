@@ -113,5 +113,9 @@ namespace ColorControls {
                 return (r, g, b);
             }
         }
+
+        public override string ToString() {
+            return $"h={H:0.000} s={S:0.000} v={V:0.000}";
+        }
     }
 }
