@@ -226,6 +226,7 @@ namespace ColorControlsTests {
             this.trackBarPTrack.Name = "trackBarPTrack";
             this.trackBarPTrack.Size = new System.Drawing.Size(188, 45);
             this.trackBarPTrack.TabIndex = 18;
+            this.trackBarPTrack.TickFrequency = 5;
             this.trackBarPTrack.Scroll += new System.EventHandler(this.TrackBarPTrack_Scroll);
             // 
             // labelPTrack
