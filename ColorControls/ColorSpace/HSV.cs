@@ -46,13 +46,9 @@ namespace ColorControls {
             }
         }
 
-        public (double r, double g, double b) RGB {
+        public RGB RGB {
             set {
-                (double r, double g, double b) = value;
-
-                r = r > 0 ? (r > 1 ? 1 : r) : 0;
-                g = g > 0 ? (g > 1 ? 1 : g) : 0;
-                b = b > 0 ? (b > 1 ? 1 : b) : 0;
+                double r = value.R, g = value.G, b = value.B;
 
                 double max_c = Math.Max(Math.Max(r, g), b);
                 double min_c = Math.Min(Math.Min(r, g), b);
@@ -110,8 +106,12 @@ namespace ColorControls {
                     }
                 }
 
-                return (r, g, b);
+                return new RGB(r, g, b);
             }
+        }
+
+        public static implicit operator RGB(HSV hsv) {
+            return hsv.RGB;
         }
 
         public override string ToString() {

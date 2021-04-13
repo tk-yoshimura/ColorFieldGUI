@@ -5,7 +5,12 @@ VisualStudioVersion = 16.0.31129.286
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ColorControls", "ColorControls\ColorControls.csproj", "{57272742-ACD7-43BF-B151-0E1E4B3D0818}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ColorControlsTests", "ColorControlsTests\ColorControlsTests.csproj", "{843F2C13-FD69-4C48-8FFD-3739C97DC3DA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ColorControlsTests", "ColorControlsTests\ColorControlsTests.csproj", "{843F2C13-FD69-4C48-8FFD-3739C97DC3DA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ColorSpaceTests", "ColorSpaceTests\ColorSpaceTests.csproj", "{5CF99BCF-06EC-4053-BD29-BEA3545E98F6}"
+	ProjectSection(ProjectDependencies) = postProject
+		{57272742-ACD7-43BF-B151-0E1E4B3D0818} = {57272742-ACD7-43BF-B151-0E1E4B3D0818}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +26,10 @@ Global
 		{843F2C13-FD69-4C48-8FFD-3739C97DC3DA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{843F2C13-FD69-4C48-8FFD-3739C97DC3DA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{843F2C13-FD69-4C48-8FFD-3739C97DC3DA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5CF99BCF-06EC-4053-BD29-BEA3545E98F6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5CF99BCF-06EC-4053-BD29-BEA3545E98F6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5CF99BCF-06EC-4053-BD29-BEA3545E98F6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5CF99BCF-06EC-4053-BD29-BEA3545E98F6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

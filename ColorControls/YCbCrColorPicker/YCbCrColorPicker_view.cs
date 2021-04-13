@@ -57,8 +57,7 @@ namespace ColorControls {
 
             int width = panel.Width, height = panel.Height;
             double inv_pic_size = 1.0 / (pic_size - 1);
-            double r, g, b, cb, cr;
-
+            
             byte[] buf = new byte[width * height * 4];
 
             static byte clip(double c) => (byte)Math.Max(Math.Min(c, 255), 0);
@@ -67,15 +66,15 @@ namespace ColorControls {
                 fixed (byte* c = buf) {
                     for (int x, y = 0, i = 0; y < height; y++) {
 
-                        cr = 0.5 - y * inv_pic_size;
+                        double cr = 0.5 - y * inv_pic_size;
 
                         for (x = 0; x < width; x++) {
 
-                            cb = x * inv_pic_size - 0.5;
+                            double cb = x * inv_pic_size - 0.5;
 
-                            b = ycbcr.Y + 1.7364369465163 * cr - 0.13272312247338 * cb;
-                            g = ycbcr.Y - 0.4182635918629 * cr - 0.71007339166301 * cb;
-                            r = ycbcr.Y + 0.1590866773267 * cr + 1.44462714671624 * cb;
+                            double r = ycbcr.Y + YCbCr.Consts.ycbcr_to_rgb_m31 * cr;
+                            double g = ycbcr.Y + YCbCr.Consts.ycbcr_to_rgb_m22 * cb + YCbCr.Consts.ycbcr_to_rgb_m32 * cr;
+                            double b = ycbcr.Y + YCbCr.Consts.ycbcr_to_rgb_m23 * cb;
 
                             c[i++] = clip(b * 255 + 0.5);
                             c[i++] = clip(g * 255 + 0.5);
@@ -112,8 +111,15 @@ namespace ColorControls {
                 return;
             }
 
-            g.DrawImageUnscaled(pointer, bar_pos.X + bar_size.Width / 2 - pointer.Width / 2, (int)(bar_pos.Y + (1 - ycbcr.Y) * (bar_size.Height - 1)) - pointer.Height / 2);
-            g.DrawImageUnscaled(pointer, (int)(panel_pos.X + (ycbcr.Cb + 0.5) * (panel_size.Width - 1)) - pointer.Width / 2, (int)(panel_pos.Y + (ycbcr.Cr + 0.5) * (panel_size.Height - 1)) - pointer.Width / 2);
+            g.DrawImageUnscaled(pointer, 
+                bar_pos.X + bar_size.Width / 2 - pointer.Width / 2, 
+                (int)(bar_pos.Y + (1 - ycbcr.Y) * (bar_size.Height - 1)) - pointer.Height / 2
+            );
+                        
+            g.DrawImageUnscaled(pointer, 
+                (int)(panel_pos.X + (ycbcr.Cb + 0.5) * (panel_size.Width - 1)) - pointer.Width / 2, 
+                (int)(panel_pos.Y - (ycbcr.Cr - 0.5) * (panel_size.Height - 1)) - pointer.Height / 2
+            );
         }
     }
 }

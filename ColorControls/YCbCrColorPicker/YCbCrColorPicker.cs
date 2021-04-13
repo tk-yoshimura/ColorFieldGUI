@@ -62,7 +62,7 @@ namespace ColorControls {
             double inv_pic_size = 1.0 / (pic_size - 1);
 
             ycbcr.Cb = (e.X - panel_pos.X) * inv_pic_size - 0.5;
-            ycbcr.Cr = (e.Y - panel_pos.Y) * inv_pic_size - 0.5;
+            ycbcr.Cr = 0.5 - (e.Y - panel_pos.Y) * inv_pic_size;
 
             Invalidate();
 
