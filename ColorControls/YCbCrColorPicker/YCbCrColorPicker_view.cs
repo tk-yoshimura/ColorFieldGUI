@@ -57,7 +57,7 @@ namespace ColorControls {
 
             int width = panel.Width, height = panel.Height;
             double inv_pic_size = 1.0 / (pic_size - 1);
-            
+
             byte[] buf = new byte[width * height * 4];
 
             static byte clip(double c) => (byte)Math.Max(Math.Min(c, 255), 0);
@@ -111,13 +111,13 @@ namespace ColorControls {
                 return;
             }
 
-            g.DrawImageUnscaled(pointer, 
-                bar_pos.X + bar_size.Width / 2 - pointer.Width / 2, 
+            g.DrawImageUnscaled(pointer,
+                bar_pos.X + bar_size.Width / 2 - pointer.Width / 2,
                 (int)(bar_pos.Y + (1 - ycbcr.Y) * (bar_size.Height - 1)) - pointer.Height / 2
             );
-                        
-            g.DrawImageUnscaled(pointer, 
-                (int)(panel_pos.X + (ycbcr.Cb + 0.5) * (panel_size.Width - 1)) - pointer.Width / 2, 
+
+            g.DrawImageUnscaled(pointer,
+                (int)(panel_pos.X + (ycbcr.Cb + 0.5) * (panel_size.Width - 1)) - pointer.Width / 2,
                 (int)(panel_pos.Y - (ycbcr.Cr - 0.5) * (panel_size.Height - 1)) - pointer.Height / 2
             );
         }

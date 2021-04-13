@@ -67,7 +67,7 @@ namespace ColorControls {
             set {
                 double r = value.R, g = value.G, b = value.B;
 
-                y  = Consts.rgb_to_ycbcr_m11 * r + Consts.rgb_to_ycbcr_m21 * g + Consts.rgb_to_ycbcr_m31 * b;
+                y = Consts.rgb_to_ycbcr_m11 * r + Consts.rgb_to_ycbcr_m21 * g + Consts.rgb_to_ycbcr_m31 * b;
                 cb = Consts.rgb_to_ycbcr_m12 * r + Consts.rgb_to_ycbcr_m22 * g + Consts.rgb_to_ycbcr_m32 * b;
                 cr = Consts.rgb_to_ycbcr_m13 * r + Consts.rgb_to_ycbcr_m23 * g + Consts.rgb_to_ycbcr_m33 * b;
             }

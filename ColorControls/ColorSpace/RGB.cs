@@ -29,10 +29,10 @@ namespace ColorControls {
             return ycbcr;
         }
 
-        public RGB Normalize => 
+        public RGB Normalize =>
             new(
-                R > 0 ? (R > 1 ? 1 : R) : 0, 
-                G > 0 ? (G > 1 ? 1 : G) : 0, 
+                R > 0 ? (R > 1 ? 1 : R) : 0,
+                G > 0 ? (G > 1 ? 1 : G) : 0,
                 B > 0 ? (B > 1 ? 1 : B) : 0
             );
 
