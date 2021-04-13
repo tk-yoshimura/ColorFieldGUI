@@ -1,5 +1,5 @@
 # ColorFieldGUI
- HSV color picker
+ HSV color picker / YCbCr(ITU-R BT.601) color picker
  
 ![HSV color picker](https://github.com/tk-yoshimura/ColorFieldGUI/blob/main/hsv_colorpicker.png)
  
