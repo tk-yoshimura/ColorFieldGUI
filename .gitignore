@@ -49,6 +49,10 @@
 *.pyc
 
 # Other
+nuget.exe
+nugetpack.bat
+/**/*.nuspec
+/**/*.nupkg
 
 # Safelist
 !/hsv_colorpicker.png
