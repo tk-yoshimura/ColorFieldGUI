@@ -1,15 +1,20 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.31129.286
+# Visual Studio Version 17
+VisualStudioVersion = 17.3.32901.215
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ColorControls", "ColorControls\ColorControls.csproj", "{57272742-ACD7-43BF-B151-0E1E4B3D0818}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ColorControlsTests", "ColorControlsTests\ColorControlsTests.csproj", "{843F2C13-FD69-4C48-8FFD-3739C97DC3DA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ColorSpaceTests", "ColorSpaceTests\ColorSpaceTests.csproj", "{5CF99BCF-06EC-4053-BD29-BEA3545E98F6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ColorSpaceTests", "ColorSpaceTests\ColorSpaceTests.csproj", "{5CF99BCF-06EC-4053-BD29-BEA3545E98F6}"
 	ProjectSection(ProjectDependencies) = postProject
 		{57272742-ACD7-43BF-B151-0E1E4B3D0818} = {57272742-ACD7-43BF-B151-0E1E4B3D0818}
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{E80C91F2-0B80-4357-B858-F7119129031C}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
 	EndProjectSection
 EndProject
 Global
