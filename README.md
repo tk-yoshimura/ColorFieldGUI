@@ -4,11 +4,11 @@
 ![HSV color picker](https://github.com/tk-yoshimura/ColorFieldGUI/blob/main/hsv_colorpicker.png)
  
 ## Requirement
- .NET 5.0
+ .NET 6.0 - windows
 
 ## Licence
 [MIT](https://github.com/tk-yoshimura/ColorFieldGUI/blob/main/LICENSE)
 
 ## Author
 
-[tk-yoshimura](https://github.com/tk-yoshimura)
+[T.Yoshimura](https://github.com/tk-yoshimura)
