@@ -1,4 +1,4 @@
-﻿// Copyright (c) T.Yoshimura 2019-2021
+﻿// Copyright (c) T.Yoshimura 2019-2024
 // https://github.com/tk-yoshimura
 
 namespace ColorControls {
@@ -37,7 +37,7 @@ namespace ColorControls {
         }
 
         public double Y {
-            get {
+            readonly get {
                 return y;
             }
             set {
@@ -46,7 +46,7 @@ namespace ColorControls {
         }
 
         public double Cb {
-            get {
+            readonly get {
                 return cb;
             }
             set {
@@ -55,7 +55,7 @@ namespace ColorControls {
         }
 
         public double Cr {
-            get {
+            readonly get {
                 return cr;
             }
             set {
@@ -72,7 +72,7 @@ namespace ColorControls {
                 cr = Consts.rgb_to_ycbcr_m13 * r + Consts.rgb_to_ycbcr_m23 * g + Consts.rgb_to_ycbcr_m33 * b;
             }
 
-            get {
+            readonly get {
                 double r = y + Consts.ycbcr_to_rgb_m31 * cr;
                 double g = y + Consts.ycbcr_to_rgb_m22 * cb + Consts.ycbcr_to_rgb_m32 * cr;
                 double b = y + Consts.ycbcr_to_rgb_m23 * cb;
@@ -85,7 +85,7 @@ namespace ColorControls {
             return ycbcr.RGB;
         }
 
-        public override string ToString() {
+        public override readonly string ToString() {
             return $"y={Y:0.000} cb={Cb:0.000} cr={Cr:0.000}";
         }
     }

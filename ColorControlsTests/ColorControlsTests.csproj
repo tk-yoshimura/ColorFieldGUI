@@ -1,14 +1,14 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net6.0-windows</TargetFramework>
+    <TargetFramework>net8.0-windows</TargetFramework>
     <UseWindowsForms>true</UseWindowsForms>
   </PropertyGroup>
 
   <ItemGroup>
     <Reference Include="ColorControls">
-      <HintPath>..\ColorControls\bin\Debug\net6.0-windows\ColorControls.dll</HintPath>
+      <HintPath>..\ColorControls\bin\Debug\net8.0-windows\ColorControls.dll</HintPath>
     </Reference>
   </ItemGroup>
 

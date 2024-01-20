@@ -2,7 +2,7 @@
 using System.Drawing;
 using System.Windows.Forms;
 
-// Copyright (c) T.Yoshimura 2019-2021
+// Copyright (c) T.Yoshimura 2019-2024
 // https://github.com/tk-yoshimura
 
 namespace ColorControls {

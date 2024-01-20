@@ -1,6 +1,6 @@
 ﻿using System;
 
-// Copyright (c) T.Yoshimura 2019-2021
+// Copyright (c) T.Yoshimura 2019-2024
 // https://github.com/tk-yoshimura
 
 namespace ColorControls {
@@ -18,7 +18,7 @@ namespace ColorControls {
         }
 
         public double H {
-            get {
+            readonly get {
                 return h;
             }
             set {
@@ -29,7 +29,7 @@ namespace ColorControls {
         }
 
         public double S {
-            get {
+            readonly get {
                 return s;
             }
             set {
@@ -38,7 +38,7 @@ namespace ColorControls {
         }
 
         public double V {
-            get {
+            readonly get {
                 return v;
             }
             set {
@@ -70,7 +70,7 @@ namespace ColorControls {
                 }
             }
 
-            get {
+            readonly get {
                 double r = v, g = v, b = v;
 
                 if (s > 0) {
@@ -114,7 +114,7 @@ namespace ColorControls {
             return hsv.RGB;
         }
 
-        public override string ToString() {
+        public override readonly string ToString() {
             return $"h={H:0.000} s={S:0.000} v={V:0.000}";
         }
     }
